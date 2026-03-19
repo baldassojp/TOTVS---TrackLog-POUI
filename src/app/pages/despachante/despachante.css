@@ -1,0 +1,499 @@
+/* ======== VARIÁVEIS CSS ======== */
+:host {
+    /* Cores da marca */
+    --color-brand: #764ab0;
+    --color-brand-dark: #5a35a0;
+    --color-brand-light: #f0e8ff;
+    --color-brand-mid: #f9f6ff;
+
+    /* Semânticas */
+    --color-azul: #2c6ef2;
+    --color-azul-light: #f0f4ff;
+    --color-azul-border: #e0e6ff;
+    --color-verde: #28a745;
+    --color-verde-light: #f8fff9;
+    --color-verde-border: #d4edda;
+    --color-amarelo: #e6a817;
+    --color-amarelo-light: #fffbf0;
+    --color-amarelo-border: #ffeeba;
+    --color-vermelho: #c9302c;
+    --color-alerta: #856404;
+    --color-alerta-light: #fff3cd;
+    --color-alerta-border: #f0ad4e;
+
+    /* Texto */
+    --color-text-primary: #333333;
+    --color-text-secondary: #666666;
+    --color-text-muted: #aaaaaa;
+    --color-text-white: #ffffff;
+
+    /* Backgrounds */
+    --color-bg-card: #ffffff;
+    --color-bg-page: #f5f5f5;
+
+    /* Bordas */
+    --color-border: #e0e0e0;
+    --color-border-light: #f0ecff;
+
+    /* Sombras */
+    --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.08);
+
+    /* Border radius */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+
+    /* Transições */
+    --transition-base: all 0.3s ease;
+    --transition-fast: all 0.15s ease;
+
+    /* Z-index */
+    --z-spine: 1;
+}
+
+/* ======== WRAPPER PRINCIPAL ======== */
+.despachante-wrapper {
+    display: grid;
+    grid-template-columns: 52px 1fr;
+    background: var(--color-bg-card);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+    min-height: 520px;
+}
+
+/* ======== SPINE — barra de progresso vertical ======== */
+.spine {
+    background: linear-gradient(180deg, var(--color-brand) 0%, var(--color-brand-dark) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 0 28px;
+    z-index: var(--z-spine);
+}
+
+.spine-passo {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.spine-bolinha {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--color-brand);
+    border: 3px solid transparent;
+    background: rgba(255, 255, 255, 0.25);
+    opacity: 0.45;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+    transition: var(--transition-base);
+}
+
+.spine-bolinha--ativo {
+    background: var(--color-text-white);
+    border-color: var(--color-text-white);
+    opacity: 1;
+}
+
+.spine-linha {
+    width: 2px;
+    flex: 1;
+    min-height: 32px;
+    background: rgba(255, 255, 255, 0.15);
+    transition: background 0.4s;
+}
+
+.spine-linha--ativo {
+    background: rgba(255, 255, 255, 0.6);
+}
+
+/* ======== CONTEÚDO PRINCIPAL ======== */
+.despachante-conteudo {
+    padding: 28px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+/* ======== SEÇÕES ======== */
+.secao {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.secao-titulo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.9px;
+    color: var(--color-brand);
+}
+
+.secao-linha {
+    flex: 1;
+    height: 1px;
+    background: var(--color-brand-light);
+    display: block;
+}
+
+.secao-rodape {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--color-border-light);
+}
+
+.secao-rodape-aviso {
+    display: flex;
+    align-items: center;
+}
+
+/* ======== CAPACIDADE DO VEÍCULO ======== */
+.capacidade-wrapper {
+    background: var(--color-brand-mid);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+}
+
+.capacidade-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    margin-bottom: 7px;
+}
+
+.capacidade-valor--ok {
+    color: var(--color-verde);
+}
+
+.capacidade-valor--alerta {
+    color: var(--color-amarelo);
+}
+
+.capacidade-valor--excedido {
+    color: var(--color-vermelho);
+}
+
+.capacidade-barra-fundo {
+    background: #e8e0f8;
+    border-radius: 99px;
+    height: 8px;
+    overflow: hidden;
+}
+
+.capacidade-barra-preenchimento {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.4s ease, background 0.3s;
+}
+
+.capacidade-barra-preenchimento--ok {
+    background: #5cb85c;
+}
+
+.capacidade-barra-preenchimento--alerta {
+    background: #f0ad4e;
+}
+
+.capacidade-barra-preenchimento--excedido {
+    background: var(--color-vermelho);
+}
+
+/* ======== BADGE DE SELECIONADOS ======== */
+.badge-selecionados {
+    background: var(--color-brand);
+    color: var(--color-text-white);
+    border-radius: 99px;
+    padding: 3px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+/* ======== FILTROS ======== */
+.filtros-row {
+    margin-bottom: 12px;
+    align-items: flex-end;
+}
+
+.filtros-rodape {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding-bottom: 2px;
+}
+
+.filtros-contador {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+}
+
+/* ======== TABELA DE PEDIDOS ======== */
+.tabela-pedidos-scroll {
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    max-height: 420px;
+    overflow: auto;
+}
+
+/* ======== ALERTA CAPACIDADE EXCEDIDA ======== */
+.alerta-capacidade {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: var(--color-alerta-light);
+    border: 1px solid var(--color-alerta-border);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+}
+
+.alerta-capacidade-icone {
+    font-size: 20px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.alerta-capacidade-titulo {
+    color: var(--color-alerta);
+    font-size: 14px;
+    display: block;
+}
+
+.alerta-capacidade-descricao {
+    margin: 4px 0 0;
+    color: var(--color-alerta);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* ======== AVISOS DO RODAPÉ ======== */
+.aviso-erro {
+    color: var(--color-vermelho);
+    font-size: 13px;
+}
+
+.aviso-info {
+    color: var(--color-text-muted);
+    font-size: 13px;
+}
+
+/* ======== MODAL — LOADING ======== */
+.modal-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 64px 32px;
+}
+
+.modal-loading-texto {
+    margin-top: 20px;
+    color: var(--color-brand);
+    font-size: 15px;
+    font-weight: 500;
+}
+
+/* ======== MODAL — PONTO DE PARTIDA ======== */
+.rota-partida {
+    background: var(--color-azul-light);
+    border-left: 4px solid var(--color-azul);
+    border-radius: var(--radius-sm);
+    padding: 10px 16px;
+    margin-bottom: 20px;
+}
+
+.rota-partida-label {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    display: block;
+    margin-bottom: 2px;
+}
+
+.rota-partida-valor {
+    color: var(--color-azul);
+}
+
+/* ======== MODAL — CARDS DE RESUMO ======== */
+.resumo-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.resumo-card {
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    text-align: center;
+    border: 1px solid var(--color-border);
+}
+
+.resumo-card--azul {
+    background: var(--color-azul-light);
+    border-color: var(--color-azul-border);
+}
+
+.resumo-card--verde {
+    background: var(--color-verde-light);
+    border-color: var(--color-verde-border);
+}
+
+.resumo-card--amarelo {
+    background: var(--color-amarelo-light);
+    border-color: var(--color-amarelo-border);
+}
+
+.resumo-card--roxo {
+    background: #fff8ff;
+    border-color: #e8d5f5;
+}
+
+.resumo-icone {
+    font-size: 22px;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.resumo-label {
+    font-size: 11px;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.resumo-valor {
+    font-size: 18px;
+    font-weight: 700;
+    margin-top: 2px;
+}
+
+.resumo-card--azul .resumo-valor {
+    color: var(--color-azul);
+}
+
+.resumo-card--verde .resumo-valor {
+    color: var(--color-verde);
+}
+
+.resumo-card--amarelo .resumo-valor {
+    color: var(--color-amarelo);
+}
+
+.resumo-card--roxo .resumo-valor {
+    color: var(--color-brand);
+}
+
+.resumo-sub {
+    font-size: 11px;
+    color: var(--color-text-muted);
+    margin-top: 2px;
+}
+
+/* ======== MODAL — MAPA ======== */
+.mapa-rota {
+    height: 320px;
+    width: 100%;
+    border-radius: var(--radius-md);
+    margin-bottom: 20px;
+    border: 1px solid var(--color-border);
+}
+
+/* ======== MODAL — OBSERVAÇÕES ======== */
+.rota-observacoes {
+    background: #f9f9f9;
+    border: 1px solid #eeeeee;
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    margin-top: 16px;
+}
+
+.rota-observacoes-label {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.rota-observacoes-texto {
+    margin: 0;
+    color: #444444;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* ======== MODAL — ROTA ENVIADA ======== */
+.rota-enviada {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #e8f5e9;
+    border: 1px solid var(--color-verde);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    margin-top: 16px;
+}
+
+.rota-enviada-icone {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.rota-enviada-titulo {
+    color: var(--color-verde);
+    font-size: 14px;
+    display: block;
+}
+
+.rota-enviada-descricao {
+    margin: 4px 0 0;
+    color: #2e7d32;
+    font-size: 13px;
+}
+
+/* ======== RESPONSIVIDADE ======== */
+@media (max-width: 768px) {
+    .despachante-wrapper {
+        grid-template-columns: 1fr;
+    }
+
+    .spine {
+        flex-direction: row;
+        padding: 16px 24px;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .spine-linha {
+        width: 32px;
+        height: 2px;
+        min-height: unset;
+        flex: unset;
+    }
+
+    .resumo-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .despachante-conteudo {
+        padding: 20px 16px;
+    }
+}
