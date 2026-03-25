@@ -1,0 +1,466 @@
+<!-- ════ TELA DE SELEÇÃO ════ -->
+@if (tela === 'selecao') {
+<div class="mtr" [class.dark]="temaEscuro">
+  <div class="sel-stage">
+
+    <div class="sel-road-bg"></div>
+
+    <svg class="sel-road-svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="rlg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="rgba(251,146,60,0)" />
+          <stop offset="40%" stop-color="rgba(251,146,60,0.7)" />
+          <stop offset="100%" stop-color="rgba(232,93,4,0.9)" />
+        </linearGradient>
+        <linearGradient id="rdark" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#2d1b00" stop-opacity="0" />
+          <stop offset="100%" stop-color="#0a0400" stop-opacity="0.85" />
+        </linearGradient>
+        <filter id="rglow">
+          <feGaussianBlur stdDeviation="3" result="b" />
+          <feMerge>
+            <feMergeNode in="b" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      <polygon points="580,520 720,900 860,900 720,520" fill="rgba(40,20,5,0.85)" />
+      <polygon points="720,520 860,900 1000,900 860,520" fill="rgba(35,15,0,0.85)" />
+      <polygon points="440,520 580,900 720,900 580,520" fill="rgba(45,22,0,0.75)" />
+      <polygon points="860,520 1000,900 1140,900 1000,520" fill="rgba(45,22,0,0.75)" />
+      <line x1="720" y1="520" x2="720" y2="900" stroke="url(#rlg)" stroke-width="2" opacity="0.9" />
+      <line x1="580" y1="520" x2="440" y2="900" stroke="url(#rlg)" stroke-width="1.5" opacity="0.7" />
+      <line x1="860" y1="520" x2="1000" y2="900" stroke="url(#rlg)" stroke-width="1.5" opacity="0.7" />
+      <line x1="712" y1="520" x2="706" y2="900" stroke="rgba(251,191,36,0.9)" stroke-width="1.5" filter="url(#rglow)" />
+      <line x1="728" y1="520" x2="734" y2="900" stroke="rgba(251,191,36,0.9)" stroke-width="1.5" filter="url(#rglow)" />
+      <line x1="651" y1="520" x2="583" y2="900" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"
+        stroke-dasharray="30,28">
+        <animate attributeName="stroke-dashoffset" from="0" to="58" dur="1.2s" repeatCount="indefinite" />
+      </line>
+      <line x1="789" y1="520" x2="857" y2="900" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"
+        stroke-dasharray="30,28">
+        <animate attributeName="stroke-dashoffset" from="0" to="58" dur="1.2s" repeatCount="indefinite" />
+      </line>
+      <ellipse cx="720" cy="520" rx="220" ry="22" fill="none" stroke="rgba(251,146,60,0.35)" stroke-width="1" />
+      <ellipse cx="720" cy="520" rx="90" ry="10" fill="rgba(232,93,4,0.2)" />
+      <rect x="0" y="0" width="1440" height="900" fill="url(#rdark)" />
+    </svg>
+
+    <div class="sel-road-fog"></div>
+    <div class="sel-horizon"></div>
+
+    <div class="sel-card">
+
+      <!-- Toggle de tema -->
+      <div class="tema-tog sel-tema-tog" (click)="temaEscuro = !temaEscuro">
+        <span class="tema-tog-emoji">{{ temaEscuro ? '🌙' : '☀️' }}</span>
+        <div class="tema-tog-track">
+          <div class="tema-tog-thumb"></div>
+        </div>
+        <span class="tema-tog-lbl">{{ temaEscuro ? 'Escuro' : 'Claro' }}</span>
+      </div>
+
+      <!-- Animação do caminhão -->
+      <div class="sel-truck-stage">
+        <div class="sel-speed-lines">
+          <div class="sel-speed-line"></div>
+          <div class="sel-speed-line"></div>
+          <div class="sel-speed-line"></div>
+        </div>
+        <div class="sel-truck-body">🚚</div>
+        <div class="sel-road-strip">
+          <div class="sel-road-dashes"></div>
+        </div>
+      </div>
+
+      <h1 class="sel-titulo">Portal do Motorista</h1>
+      <p class="sel-sub">Selecione seu código para acessar a rota do dia</p>
+
+      <po-select name="motorista" placeholder="Selecione o motorista..." [p-options]="motoristas"
+        [ngModel]="motoristaSelecionado" (ngModelChange)="onMotoristaMudou($event)" [p-loading]="carregandoMotoristas">
+      </po-select>
+
+      <div class="sel-btn-wrap">
+        <button class="sel-btn" (click)="buscarRota()" [disabled]="buscandoRota || !motoristaSelecionado">
+          @if (buscandoRota) {
+          <span class="sel-spinner"></span>
+          <span>Buscando rota...</span>
+          } @else {
+          <span>🗺️</span>
+          <span>Iniciar Minha Rota</span>
+          <span class="sel-btn-arrow">→</span>
+          }
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+}
+
+
+<!-- ════ TELA DE ROTA ════ -->
+@if (tela === 'rota') {
+<div class="mtr" [class.dark]="temaEscuro">
+  <div class="rota-root">
+
+    <!-- ── HEADER FIXO ── -->
+    <header class="rt-hdr">
+
+      <div class="rt-hdr-l">
+        <div class="rt-vbadge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="1" y="3" width="15" height="13" rx="1" />
+            <path d="M16 8h4l3 5v3h-7V8z" />
+            <circle cx="5.5" cy="18.5" r="2.5" />
+            <circle cx="18.5" cy="18.5" r="2.5" />
+          </svg>
+          {{ rotaCod }}
+        </div>
+
+        <div class="rt-sep"></div>
+
+        <div class="rt-driver">
+          <div class="rt-avatar">{{ inicialMotorista }}</div>
+          <div>
+            <div class="rt-dname">{{ nomeMotoristaLabel || rota?.obs || 'Motorista' }}</div>
+            <div class="rt-dsince">Em rota · {{ tempoEmRota }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rt-hdr-c">
+        <div class="rt-prog-block">
+          <div class="rt-prog-lbl">Progresso da Rota</div>
+          <div class="rt-prog-wrap">
+            <div class="rt-prog-fill" [style.width.%]="progressoPct"></div>
+          </div>
+          <div class="rt-prog-nums">
+            <strong>{{ paradasEntregues }}</strong> de {{ paradas.length }} entregas · {{ progressoPct }}%
+          </div>
+        </div>
+
+        <div class="rt-chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 8v4l3 3" />
+          </svg>
+          {{ kmPercorridosFormatado }} / {{ kmTotaisEstimado }} km
+        </div>
+      </div>
+
+      <div class="rt-hdr-r">
+        <span class="rt-gps" [class.on]="gpsAtivo">
+          <span class="rt-gps-dot"></span>
+          {{ gpsAtivo ? 'GPS Ativo' : 'GPS Inativo' }}
+        </span>
+        <div class="rt-tema-tog" (click)="temaEscuro = !temaEscuro">
+          <span class="rt-tema-emoji">{{ temaEscuro ? '🌙' : '☀️' }}</span>
+          <div class="tema-tog-track">
+            <div class="tema-tog-thumb"></div>
+          </div>
+          <span class="rt-tema-tog-lbl">{{ temaEscuro ? 'Escuro' : 'Claro' }}</span>
+        </div>
+      </div>
+
+    </header>
+
+    <!-- ── MAIN: sidebar + mapa ── -->
+    <div class="rt-main">
+
+      <!-- SIDEBAR -->
+      <aside class="rt-sidebar">
+        <div class="rt-kpill ky" title="Pendentes">
+          <div class="rt-knum">{{ paradasPendentes }}</div>
+          <div class="rt-klbl">Pend.</div>
+        </div>
+        <div class="rt-kpill kg" title="Entregues">
+          <div class="rt-knum">{{ paradasEntregues }}</div>
+          <div class="rt-klbl">Entg.</div>
+        </div>
+        <div class="rt-kpill kr" title="Problemas">
+          <div class="rt-knum">{{ paradasProblema }}</div>
+          <div class="rt-klbl">Prob.</div>
+        </div>
+
+        <div class="rt-sdiv"></div>
+
+        <div class="rt-sb-stat" title="Km percorridos">
+          <div class="rt-sb-stat-val">{{ kmPercorridosFormatado }}</div>
+          <div class="rt-sb-stat-lbl">km</div>
+        </div>
+
+        <div class="rt-sdiv"></div>
+
+        <div class="rt-sbtn" title="Próxima entrega" (click)="centralizarNaProxima()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <polygon points="5 3 19 12 5 21 5 3" />
+          </svg>
+          <span class="rt-sbtn-lbl">Próx.</span>
+        </div>
+        <div class="rt-sbtn" title="Centralizar mapa" (click)="centralizarMapa()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M12 1v4M12 19v4M1 12h4M19 12h4" />
+          </svg>
+          <span class="rt-sbtn-lbl">Rota</span>
+        </div>
+        <div class="rt-sbtn" title="Voltar" (click)="voltarSelecao()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          <span class="rt-sbtn-lbl">Sair</span>
+        </div>
+      </aside>
+
+      <!-- MAPA -->
+      <div class="rt-map">
+        <div id="mapa-motorista"></div>
+
+        @if (gpsAtivo) {
+        <div class="rt-vel-hud">
+          <div class="rt-vel-num">{{ velocidadeAtual }}</div>
+          <div class="rt-vel-unit">km/h</div>
+        </div>
+        }
+
+        @if (proximaParada) {
+        <div class="rt-proxima-banner" (click)="centralizarNaProxima()">
+          <div class="rt-proxima-tag">📍 Próxima entrega</div>
+          <div class="rt-proxima-name">{{ proximaParada.nomeCliente || 'Cliente não informado' }}</div>
+          <div class="rt-proxima-addr">
+            {{ proximaParada.endereco }}{{ proximaParada.cidade ? ', ' + proximaParada.cidade : '' }}
+          </div>
+          <div class="rt-proxima-eta">⏱ Previsão {{ etaPrevista }} · NF {{ proximaParada.pedido }}</div>
+        </div>
+        }
+
+        <div class="rt-map-ctrl">
+          <div class="rt-map-btn" (click)="zoomIn()">+</div>
+          <div class="rt-map-btn" (click)="zoomOut()">−</div>
+          <div class="rt-map-btn rt-map-btn--icon" (click)="centralizarNaProxima()" title="Ir para próxima">📍</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── BOTTOM PANEL ── -->
+    <div class="rt-bottom">
+
+      <div class="rt-bottom-hdr">
+        <div class="rt-seq-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
+          </svg>
+          Sequência de Entregas
+        </div>
+        <div class="rt-bottom-meta">
+          <strong>{{ paradas.length }}</strong>&nbsp;paradas
+          &nbsp;·&nbsp;
+          <strong>{{ paradasEntregues }}</strong>&nbsp;entregues
+          &nbsp;·&nbsp;
+          <strong class="rt-bottom-meta--problema">{{ paradasProblema }}</strong>&nbsp;problemas
+          <div class="rt-recolher" (click)="drawerCollapsed = !drawerCollapsed">
+            {{ drawerCollapsed ? '▲ Expandir' : '▼ Recolher' }}
+          </div>
+        </div>
+      </div>
+
+      <div class="rt-cards-row" [class.collapsed]="drawerCollapsed">
+
+        @if (paradas.length === 0) {
+        <div class="rt-cards-vazio">Nenhuma parada encontrada.</div>
+        }
+
+        @for (parada of paradas; track parada.pedido; let i = $index) {
+        <div class="rt-card" [class]="'rt-card rt-card--s' + parada.status"
+          [class.proxima]="proximaParada?.pedido === parada.pedido" [style.animation-delay]="(i * 50) + 'ms'">
+
+          <!-- Topo do card -->
+          <div class="rt-card-top">
+            <div class="rt-card-seq">{{ parada.seq }}</div>
+            <div class="rt-card-top-right">
+              @if (proximaParada?.pedido === parada.pedido) {
+              <span class="rt-card-proxima-label">PRÓXIMA</span>
+              }
+              <div class="rt-card-badge">
+                @if (parada.status === '0') { ⏳ Pendente }
+                @if (parada.status === '1') { 📍 Chegou }
+                @if (parada.status === '2') { ✅ Entregue }
+                @if (parada.status === '3') { ❌ Problema }
+              </div>
+            </div>
+          </div>
+
+          <!-- Corpo do card -->
+          <div class="rt-card-body">
+            <div class="rt-card-client">{{ parada.nomeCliente || 'Cliente não informado' }}</div>
+            <div class="rt-card-addr">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+              {{ parada.endereco }}{{ parada.cidade ? ', ' + parada.cidade : '' }}
+            </div>
+            <div class="rt-card-meta">
+              @if (parada.volumes) {
+              <div class="rt-meta-chip">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path
+                    d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
+                </svg>
+                {{ parada.volumes }} vol.
+              </div>
+              }
+              @if (parada.peso) {
+              <div class="rt-meta-chip">⚖️ {{ parada.peso }} kg</div>
+              }
+              <div class="rt-card-prazo ok">
+                🕐 {{ calcularHoraPrevista(parada.seq) }}
+              </div>
+            </div>
+            <div class="rt-card-nf">NF {{ parada.pedido }}</div>
+          </div>
+
+          <!-- Ações do card -->
+          <div class="rt-card-actions">
+            <a [href]="'https://www.google.com/maps/search/?api=1&query=' + encodeEndereco(parada)" target="_blank"
+              class="rt-btn-maps" title="Navegar no Google Maps">
+              🗺️
+            </a>
+            @if (parada.status === '0') {
+            <button class="rt-btn rt-btn-chegou" (click)="abrirModal(parada, '1')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+              Cheguei
+            </button>
+            }
+            @if (parada.status === '1') {
+            <button class="rt-btn rt-btn-entregue" (click)="abrirModal(parada, '2')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              Entregue
+            </button>
+            }
+            @if (parada.status === '0' || parada.status === '1') {
+            <button class="rt-btn rt-btn-prob" (click)="abrirModal(parada, '3')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+              Problema
+            </button>
+            }
+          </div>
+
+        </div>
+        }
+
+      </div>
+    </div>
+
+  </div>
+</div>
+}
+
+<!-- ════════ MODAL DE STATUS ════════ -->
+<po-modal #modalObs [p-title]="tituloModal" [p-primary-action]="acaoConfirmar" [p-secondary-action]="acaoCancelar"
+  [p-hide-close]="true" p-size="md">
+
+  @if (paradaModal) {
+
+  <!-- Info da parada -->
+  <div class="mtr-modal-info">
+    <p><strong>Cliente:</strong> {{ paradaModal.nomeCliente || 'Não informado' }}</p>
+    <p>
+      <strong>Endereço:</strong>
+      {{ paradaModal.endereco }}{{ paradaModal.cidade ? ', ' + paradaModal.cidade : '' }}
+    </p>
+    <p>
+      <strong>Pedido:</strong>
+      <span class="mtr-modal-pedido-badge">{{ paradaModal.pedido }}</span>
+      @if (paradaModal.volumes) {
+      <span class="mtr-modal-volumes">📦 {{ paradaModal.volumes }} vol · {{ paradaModal.peso || '?' }} kg</span>
+      }
+    </p>
+  </div>
+
+  <!-- Situação de chegada -->
+  @if (statusModal === '1') {
+  <div class="mtr-modal-section">
+    <div class="mtr-ocorrencias-grid">
+      @for (tipo of tiposChegada; track tipo.value) {
+      <div class="mtr-oc-card mtr-oc-card--chegada" [class.ativo]="tipoChegadaSelecionado === tipo.value"
+        (click)="selecionarChegada(tipo.value)">
+        <div class="mtr-oc-check">✓</div>
+        <div class="mtr-oc-icon">{{ tipo.icone }}</div>
+        <div class="mtr-oc-label">{{ tipo.label }}</div>
+      </div>
+      }
+    </div>
+  </div>
+  }
+
+  <!-- Tipo de ocorrência -->
+  @if (statusModal === '3') {
+  <div class="mtr-modal-section">
+    <div class="mtr-ocorrencias-grid">
+      @for (tipo of tiposOcorrencia; track tipo.value) {
+      <div class="mtr-oc-card" [class.ativo]="tipoOcorrenciaSelecionado === tipo.value"
+        (click)="selecionarOcorrencia(tipo.value)">
+        <div class="mtr-oc-check">✓</div>
+        <div class="mtr-oc-icon">{{ ocorrenciaIcone(tipo.value) }}</div>
+        <div class="mtr-oc-label">{{ tipo.label }}</div>
+      </div>
+      }
+    </div>
+  </div>
+  }
+
+  <!-- Assinatura -->
+  @if (statusModal === '2') {
+  <div class="mtr-modal-section">
+    <span class="mtr-modal-section-label">Assinatura do recebedor</span>
+    <div class="mtr-assinatura-wrap">
+      <canvas id="canvas-assinatura" width="460" height="100" class="mtr-assinatura-canvas">
+      </canvas>
+      @if (!assinaturaBase64) {
+      <div class="mtr-assinatura-placeholder">✍️ Assine aqui</div>
+      }
+    </div>
+    <div class="mtr-assinatura-actions">
+      <button class="mtr-btn-sm" (click)="limparAssinatura()">🗑 Limpar</button>
+    </div>
+  </div>
+
+  <!-- Foto do comprovante -->
+  <div class="mtr-modal-section">
+    <span class="mtr-modal-section-label">Foto do comprovante</span>
+    <div class="mtr-foto-wrap">
+      @if (fotoBase64) {
+      <img [src]="fotoBase64" class="mtr-foto-preview" alt="Comprovante">
+      <button class="mtr-btn-sm" (click)="removerFoto()">🗑 Remover</button>
+      } @else {
+      <label class="mtr-foto-btn" for="input-foto">📷 Tirar foto</label>
+      <input id="input-foto" type="file" accept="image/*" capture="environment" class="mtr-foto-input"
+        (change)="tirarFoto($event)">
+      }
+    </div>
+  </div>
+  }
+
+  <!-- Observação -->
+  <po-textarea name="obs" label="Observação (opcional)"
+    [p-placeholder]="statusModal === '3' ? 'Descreva o problema em detalhes...' : 'Ex: Entregue para porteiro, nome: João...'"
+    [(ngModel)]="obsTexto" [p-rows]="3">
+  </po-textarea>
+
+  }
+
+</po-modal>

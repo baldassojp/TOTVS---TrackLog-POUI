@@ -1,0 +1,251 @@
+<!-- ════ MODAL ROTA ════ -->
+<po-modal #modalRota p-title="Rota Otimizada pela IA" p-size="xl" [p-primary-action]="acaoEnviarMotorista"
+    [p-secondary-action]="acaoFechar">
+
+    <!-- Loading -->
+    @if (carregandoRota) {
+    <div class="modal-loading">
+        <po-loading-overlay [p-screen-lock]="false"></po-loading-overlay>
+        <p class="modal-loading-texto">A IA está calculando a melhor rota...</p>
+    </div>
+    }
+
+    <!-- Conteúdo da rota gerada -->
+    @if (!carregandoRota && rotaGerada.length > 0) {
+
+    <!-- Ponto de partida -->
+    <div class="rota-partida">
+        <span class="rota-partida-label">Ponto de Partida</span>
+        <strong class="rota-partida-valor">{{ pontodePartida }}</strong>
+    </div>
+
+    <!-- Cards de resumo -->
+    @if (resumoRota) {
+    <div class="resumo-grid">
+
+        <div class="resumo-card resumo-card--azul">
+            <po-icon class="resumo-icone" p-icon="po-icon-location"></po-icon>
+            <div class="resumo-label">Distância</div>
+            <div class="resumo-valor">{{ resumoRota.distancia }}</div>
+        </div>
+
+        <div class="resumo-card resumo-card--verde">
+            <po-icon class="resumo-icone" p-icon="po-icon-clock"></po-icon>
+            <div class="resumo-label">Tempo Estimado</div>
+            <div class="resumo-valor">{{ resumoRota.tempo }}</div>
+        </div>
+
+        <div class="resumo-card resumo-card--amarelo">
+            <po-icon class="resumo-icone" p-icon="po-icon-finance"></po-icon>
+            <div class="resumo-label">Combustível</div>
+            <div class="resumo-valor">{{ resumoRota.litros }}</div>
+            <div class="resumo-sub">{{ resumoRota.combustivel }}</div>
+        </div>
+
+        <div class="resumo-card resumo-card--roxo">
+            <po-icon class="resumo-icone" p-icon="po-icon-dollar-sign"></po-icon>
+            <div class="resumo-label">Custo Estimado</div>
+            <div class="resumo-valor">{{ resumoRota.custo }}</div>
+        </div>
+
+    </div>
+    }
+
+    <po-divider p-label="Mapa da Rota"></po-divider>
+    <div id="mapa-rota" class="mapa-rota"></div>
+
+    <po-divider p-label="Sequência de Entregas"></po-divider>
+    <po-table [p-columns]="colunasRota" [p-items]="rotaGerada" [p-striped]="true">
+    </po-table>
+
+    <!-- Observações da IA -->
+    @if (observacoesRota) {
+    <div class="rota-observacoes">
+        <span class="rota-observacoes-label">Observações da IA</span>
+        <p class="rota-observacoes-texto">{{ observacoesRota }}</p>
+    </div>
+    }
+
+    <!-- Confirmação de envio -->
+    @if (codigoRotaSalva) {
+    <div class="rota-enviada">
+        <po-icon class="rota-enviada-icone" p-icon="po-icon-ok"></po-icon>
+        <div>
+            <strong class="rota-enviada-titulo">Rota enviada com sucesso!</strong>
+            <p class="rota-enviada-descricao">
+                Código da rota: <strong>{{ codigoRotaSalva }}</strong> · O motorista já pode visualizar no painel dele.
+            </p>
+        </div>
+    </div>
+    }
+
+    }
+
+</po-modal>
+
+<!-- ════ PÁGINA ════ -->
+<po-page-default p-title="Rota de Entrega">
+
+    <!-- WRAPPER: spine + conteúdo lado a lado -->
+    <div class="despachante-wrapper">
+
+        <!-- ── SPINE: barra de progresso vertical ── -->
+        <div class="spine">
+
+            <div class="spine-passo">
+                <div class="spine-bolinha" [class.spine-bolinha--ativo]="etapaAtual >= 1">
+                    {{ etapaAtual > 1 ? '✓' : '1' }}
+                </div>
+            </div>
+
+            <div class="spine-linha" [class.spine-linha--ativo]="etapaAtual >= 2">
+            </div>
+
+            <div class="spine-passo">
+                <div class="spine-bolinha" [class.spine-bolinha--ativo]="etapaAtual >= 2">
+                    {{ etapaAtual > 2 ? '✓' : '2' }}
+                </div>
+            </div>
+
+            <div class="spine-linha" [class.spine-linha--ativo]="etapaAtual >= 3">
+            </div>
+
+            <div class="spine-passo">
+                <div class="spine-bolinha" [class.spine-bolinha--ativo]="etapaAtual >= 3">
+                    3
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ── CONTEÚDO PRINCIPAL ── -->
+        <div class="despachante-conteudo">
+
+            <!-- ── SEÇÃO 1: Configuração ── -->
+            <section class="secao">
+
+                <div class="secao-titulo">
+                    <po-icon p-icon="po-icon-settings"></po-icon>
+                    Configuração da Rota
+                    <span class="secao-linha"></span>
+                </div>
+
+                <div class="po-row">
+                    <po-datepicker class="po-md-4" name="data" p-label="Data de Entrega" [(ngModel)]="filtroData">
+                    </po-datepicker>
+
+                    <po-select class="po-md-4" name="motorista" p-label="Motorista" [p-options]="motoristas"
+                        [ngModel]="motoristaSelecionado" (ngModelChange)="onMotoristaMudou($event)">
+                    </po-select>
+
+                    <po-select class="po-md-4" name="veiculo" p-label="Veículo" [p-options]="veiculos"
+                        [ngModel]="veiculoSelecionado" (ngModelChange)="onVeiculoMudou($event)">
+                    </po-select>
+                </div>
+
+                <!-- Barra de capacidade -->
+                @if (veiculoSelecionado && capacidadeVeiculo > 0) {
+                <div class="capacidade-wrapper">
+                    <div class="capacidade-header">
+                        <span>Capacidade do Veículo</span>
+                        <strong [class.capacidade-valor--ok]="!capacidadeExcedida && percentualCapacidade <= 80"
+                            [class.capacidade-valor--alerta]="!capacidadeExcedida && percentualCapacidade > 80"
+                            [class.capacidade-valor--excedido]="capacidadeExcedida">
+                            {{ totalVolumes }} / {{ capacidadeVeiculo }} volumes
+                            @if (capacidadeExcedida) { &nbsp;⚠️ EXCEDIDO }
+                        </strong>
+                    </div>
+                    <div class="capacidade-barra-fundo">
+                        <div class="capacidade-barra-preenchimento" [style.width.%]="percentualCapacidade"
+                            [class.capacidade-barra-preenchimento--ok]="!capacidadeExcedida && percentualCapacidade <= 80"
+                            [class.capacidade-barra-preenchimento--alerta]="!capacidadeExcedida && percentualCapacidade > 80"
+                            [class.capacidade-barra-preenchimento--excedido]="capacidadeExcedida">
+                        </div>
+                    </div>
+                </div>
+                }
+
+            </section>
+
+            <!-- ── SEÇÃO 2: Pedidos ── -->
+            <section class="secao">
+
+                <div class="secao-titulo">
+                    <po-icon p-icon="po-icon-box"></po-icon>
+                    Pedidos Disponíveis
+                    <span class="secao-linha"></span>
+
+                    @if (pedidosSelecionados.length > 0) {
+                    <span class="badge-selecionados">
+                        {{ pedidosSelecionados.length }} selecionado(s) · {{ totalVolumes }} vol.
+                    </span>
+                    <po-button p-label="Limpar" p-kind="danger" p-icon="po-icon-delete" (p-click)="limparSelecao()">
+                    </po-button>
+                    }
+                </div>
+
+                <!-- Filtros -->
+                <div class="po-row filtros-row">
+                    <po-input class="po-md-5" name="filtroBusca" p-label="Buscar pedido ou cliente"
+                        p-icon="po-icon-search" [ngModel]="filtroBusca"
+                        (ngModelChange)="filtroBusca = $event; filtrarPedidos()">
+                    </po-input>
+
+                    <po-select class="po-md-4" name="filtroCidade" p-label="Filtrar por Cidade"
+                        [p-options]="cidadesOptions" [ngModel]="filtroCidade"
+                        (ngModelChange)="filtroCidade = $event; filtrarPedidos()">
+                    </po-select>
+
+                    <div class="po-md-3 filtros-rodape">
+                        <po-button p-label="Limpar" p-kind="tertiary" p-icon="po-icon-close"
+                            (p-click)="limparFiltros()">
+                        </po-button>
+                        <span class="filtros-contador">{{ pedidosFiltrados.length }} resultado(s)</span>
+                    </div>
+                </div>
+
+                <!-- Tabela de pedidos -->
+                <div class="tabela-pedidos-scroll">
+                    <po-table [p-columns]="colunasPedidos" [p-items]="pedidosFiltrados" [p-selectable]="true"
+                        [p-loading]="carregandoDados" (p-selected)="onSelecionarPedido($event)"
+                        (p-unselected)="onDeselecionarPedido($event)">
+                    </po-table>
+                </div>
+
+                <!-- Alerta capacidade excedida -->
+                @if (capacidadeExcedida) {
+                <div class="alerta-capacidade">
+                    <po-icon class="alerta-capacidade-icone" p-icon="po-icon-warning"></po-icon>
+                    <div>
+                        <strong class="alerta-capacidade-titulo">Capacidade do veículo excedida</strong>
+                        <p class="alerta-capacidade-descricao">
+                            Os pedidos somam <strong>{{ totalVolumes }} volumes</strong>, acima do limite de
+                            <strong>{{ capacidadeVeiculo }} volumes</strong>. Remova pedidos ou troque o veículo.
+                        </p>
+                    </div>
+                </div>
+                }
+
+                <!-- Rodapé com ações -->
+                <div class="secao-rodape">
+                    <div class="secao-rodape-aviso">
+                        @if (pedidosSelecionados.length > 0 && (!motoristaSelecionado || !veiculoSelecionado)) {
+                        <span class="aviso-erro">Selecione um motorista e um veículo para continuar.</span>
+                        }
+                        @if (pedidosSelecionados.length === 0) {
+                        <span class="aviso-info">Selecione ao menos um pedido para gerar a rota.</span>
+                        }
+                    </div>
+
+                    <po-button p-label="Gerar Rota Otimizada" p-kind="primary" p-icon="po-icon-map-marker"
+                        [p-disabled]="pedidosSelecionados.length === 0 || !motoristaSelecionado || !veiculoSelecionado"
+                        [p-loading]="carregandoRota" (p-click)="gerarRota()">
+                    </po-button>
+                </div>
+
+            </section>
+
+        </div>
+    </div>
+
+</po-page-default>
