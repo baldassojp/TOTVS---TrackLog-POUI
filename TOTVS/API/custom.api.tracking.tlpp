@@ -1,0 +1,548 @@
+#INCLUDE 'TLPP-CORE.TH'
+#INCLUDE 'TLPP-REST.TH'
+
+Namespace custom.tracking.poui
+
+@Get( '/api/tracklog/motoristas' )
+User Function consultaMotoristas()
+
+	Local jResponse   := JsonObject():New()  As Json
+	Local jMotorista  := NIL                 As Json
+
+	Local aMotoristas := {}                  As Array
+
+	DBSelectArea( 'DA4' )
+	DA4->( DBSetOrder( 1 ) )
+	DA4->( DBGoTop() )
+
+	While DA4->( !EoF() )
+
+		IF !DA4->( Deleted() )
+
+			jMotorista := JsonObject():New()
+			jMotorista[ 'codigo'   ] := EncodeUTF8( AllTrim( DA4->DA4_COD    ) )
+			jMotorista[ 'nome'     ] := EncodeUTF8( AllTrim( DA4->DA4_NOME   ) )
+			jMotorista[ 'filial'   ] := EncodeUTF8( AllTrim( DA4->DA4_FILIAL ) )
+			jMotorista[ 'cpf'      ] := EncodeUTF8( AllTrim( DA4->DA4_CGC    ) )
+			jMotorista[ 'cnh'      ] := EncodeUTF8( AllTrim( DA4->DA4_NUMCNH ) )
+			jMotorista[ 'categCnh' ] := EncodeUTF8( AllTrim( DA4->DA4_CATCNH ) )
+			jMotorista[ 'vencCnh'  ] := DTOS( DA4->DA4_DTVCNH                  )
+			jMotorista[ 'telefone' ] := EncodeUTF8( AllTrim( DA4->DA4_TEL    ) )
+			jMotorista[ 'situacao' ] := EncodeUTF8( AllTrim( DA4->DA4_BLQMOT ) )
+
+			aAdd( aMotoristas, jMotorista )
+
+		EndIF
+
+		DA4->( DBSkip() )
+
+	EndDo
+
+	IF Len( aMotoristas ) > 0
+		jResponse[ 'success' ] := .T.
+		jResponse[ 'message' ] := 'Motoristas Encontrados'
+		jResponse[ 'total'   ] := Len( aMotoristas )
+		jResponse[ 'data'    ] := aMotoristas
+	Else
+		jResponse[ 'success' ] := .F.
+		jResponse[ 'message' ] := 'Nenhum Motorista Encontrado'
+	EndIF
+
+	oRest:setKeyHeaderResponse( 'Access-Control-Allow-Origin',  '*' )
+	oRest:setKeyHeaderResponse( 'Access-Control-Allow-Methods', 'GET, POST, OPTIONS' )
+	oRest:setKeyHeaderResponse( 'Access-Control-Allow-Headers', 'Content-Type, Authorization' )
+	oRest:setKeyHeaderResponse( 'Content-Type', 'application/json; charset=utf-8' )
+	oRest:SetResponse( jResponse:ToJson() )
+
+Return( .T. )
+
+	@Get( '/api/tracklog/veiculos' )
+User Function consultaVeiculos()
+
+	Local jResponse := JsonObject():New()  As Json
+	Local jVeiculo  := NIL                 As Json
+
+	Local aVeiculos := {}                  As Array
+
+	DBSelectArea( 'DA3' )
+	DA3->( DBSetOrder( 1 ) )
+	DA3->( DBGoTop() )
+
+	While DA3->( !EoF() )
+
+		IF !DA3->( Deleted() )
+
+			jVeiculo := JsonObject():New()
+			jVeiculo[ 'codigo'    ] := EncodeUTF8( AllTrim( DA3->DA3_COD    ) )
+			jVeiculo[ 'filial'    ] := EncodeUTF8( AllTrim( DA3->DA3_FILIAL ) )
+			jVeiculo[ 'placa'     ] := EncodeUTF8( AllTrim( DA3->DA3_PLACA  ) )
+			jVeiculo[ 'modelo'    ] := EncodeUTF8( AllTrim( DA3->DA3_DESC   ) )
+			jVeiculo[ 'anoModelo' ] := EncodeUTF8( AllTrim( DA3->DA3_ANOMOD ) )
+			jVeiculo[ 'anoFab'    ] := EncodeUTF8( AllTrim( DA3->DA3_ANOFAB ) )
+			jVeiculo[ 'capacNom'  ] :=                    ( DA3->DA3_CAPACN   )
+			jVeiculo[ 'capacMax'  ] :=                    ( DA3->DA3_CAPACM   )
+			jVeiculo[ 'motorista' ] := EncodeUTF8( AllTrim( DA3->DA3_MOTORI ) )
+			jVeiculo[ 'ativo'     ] := EncodeUTF8( AllTrim( DA3->DA3_ATIVO  ) )
+			jVeiculo[ 'status'    ] := EncodeUTF8( AllTrim( DA3->DA3_STATUS ) )
+			jVeiculo[ 'frota'     ] := EncodeUTF8( AllTrim( DA3->DA3_FROVEI ) )
+			jVeiculo[ 'chassi'    ] := EncodeUTF8( AllTrim( DA3->DA3_CHASSI ) )
+			jVeiculo[ 'renavam'   ] := EncodeUTF8( AllTrim( DA3->DA3_RENAVA ) )
+
+			aAdd( aVeiculos, jVeiculo )
+
+		EndIF
+
+		DA3->( DBSkip() )
+
+	EndDo
+
+	IF Len( aVeiculos ) > 0
+		jResponse[ 'success' ] := .T.
+		jResponse[ 'message' ] := 'Veículos Encontrados'
+		jResponse[ 'total'   ] := Len( aVeiculos )
+		jResponse[ 'data'    ] := aVeiculos
+	Else
+		jResponse[ 'success' ] := .F.
+		jResponse[ 'message' ] := 'Nenhum Veículo Encontrado'
+	EndIF
+
+	oRest:setKeyHeaderResponse( 'Access-Control-Allow-Origin',  '*' )
+	oRest:setKeyHeaderResponse( 'Access-Control-Allow-Methods', 'GET, POST, OPTIONS' )
+	oRest:setKeyHeaderResponse( 'Access-Control-Allow-Headers', 'Content-Type, Authorization' )
+	oRest:setKeyHeaderResponse( 'Content-Type', 'application/json; charset=utf-8' )
+	oRest:SetResponse( jResponse:ToJson() )
+
+Return( .T. )
+
+	@Get( '/api/tracklog/pedidos' )
+User Function consultaPedidos()
+
+	Local jResponse := JsonObject():New()  As Json
+	Local jItem     := NIL                 As Json
+	Local jItens    := NIL                 As Json
+
+	Local aItens    := {}                  As Array
+	Local aPedidos  := {}                  As Array
+
+	Local cNum      := ''                  As Character
+
+	DBSelectArea( 'SC5' )
+	SC5->( DBSetOrder( 1 ) )
+	SC5->( DBGoTop() )
+
+	While SC5->( !EoF() )
+
+		IF !SC5->( Deleted() )
+
+			cNum   := AllTrim( SC5->C5_NUM )
+			aItens := {}
+
+			DBSelectArea( 'SC6' )
+			SC6->( DBSetOrder( 1 ) )
+
+			IF SC6->( MsSeek( cNum ) )
+
+				While SC6->( !EoF() ) .AND. !SC6->( Deleted() ) .AND. AllTrim( SC6->C6_NUM ) == cNum
+
+					jItens := JsonObject():New()
+					jItens[ 'item'    ] := EncodeUTF8( AllTrim( SC6->C6_ITEM    ) )
+					jItens[ 'produto' ] := EncodeUTF8( AllTrim( SC6->C6_PRODUTO ) )
+					jItens[ 'qtd'     ] :=           ( SC6->C6_QTDVEN             )
+
+					aAdd( aItens, jItens )
+					SC6->( DBSkip() )
+
+				EndDo
+
+			EndIF
+
+			DBSelectArea( 'SC5' )
+
+			jItem := JsonObject():New()
+			jItem[ 'numero'  ] := EncodeUTF8( AllTrim( SC5->C5_NUM     ) )
+			jItem[ 'filial'  ] := EncodeUTF8( AllTrim( SC5->C5_FILIAL  ) )
+			jItem[ 'cliente' ] := EncodeUTF8( AllTrim( SC5->C5_CLIENTE ) )
+			jItem[ 'loja'    ] := EncodeUTF8( AllTrim( SC5->C5_LOJACLI ) )
+			jItem[ 'emissao' ] := DTOS( SC5->C5_EMISSAO                  )
+			jItem[ 'volumes' ] := Len( aItens                            )
+			jItem[ 'itens'   ] := aItens
+
+			DBSelectArea( 'SA1' )
+			SA1->( DBSetOrder( 1 ) )
+
+			IF SA1->( MsSeek( PadR( AllTrim( SC5->C5_FILIAL  ), 2 ) + PadR( AllTrim( SC5->C5_CLIENTE ), 6 ) + PadR( AllTrim( SC5->C5_LOJACLI ), 2 ) ) )
+				jItem[ 'nomeCliente' ] := EncodeUTF8( AllTrim( SA1->A1_NOME ) )
+				jItem[ 'endereco'    ] := EncodeUTF8( AllTrim( SA1->A1_END  ) )
+				jItem[ 'bairro'      ] := EncodeUTF8( AllTrim( SA1->A1_BAIRRO ) )
+				jItem[ 'cidade'      ] := EncodeUTF8( AllTrim( SA1->A1_MUN  ) )
+				jItem[ 'estado'      ] := EncodeUTF8( AllTrim( SA1->A1_EST  ) )
+			Else
+				jItem[ 'nomeCliente' ] := 'NAO_ENCONTRADO'
+				jItem[ 'endereco'    ] := ''
+				jItem[ 'bairro'      ] := ''
+				jItem[ 'cidade'      ] := ''
+				jItem[ 'estado'      ] := ''
+			EndIF
+
+			DBSelectArea( 'SC5' )
+			aAdd( aPedidos, jItem )
+
+		EndIF
+
+		SC5->( DBSkip() )
+
+	EndDo
+
+	jResponse[ 'success' ] := .T.
+	jResponse[ 'total'   ] := Len( aPedidos )
+	jResponse[ 'data'    ] := aPedidos
+
+	oRest:setKeyHeaderResponse( 'Access-Control-Allow-Origin',  '*' )
+	oRest:setKeyHeaderResponse( 'Access-Control-Allow-Methods', 'GET, POST, OPTIONS' )
+	oRest:setKeyHeaderResponse( 'Access-Control-Allow-Headers', 'Content-Type, Authorization' )
+	oRest:setKeyHeaderResponse( 'Content-Type', 'application/json; charset=utf-8' )
+	oRest:SetResponse( jResponse:ToJson() )
+
+Return( .T. )
+
+	@Post( '/api/tracklog/rotas/salvar' )
+User Function salvarRota()
+
+	Local jBody     := JsonObject():New()  As Json
+	Local jResponse := JsonObject():New()  As Json
+
+	Local cBody  := oRest:GetBodyRequest() As Character
+	Local cCod   := ''                     As Character
+
+	Local nTotal := 0                      As Numeric
+	Local nI     := 0                      As Numeric
+
+	jBody:FromJson( cBody )
+
+	cCod   := AllTrim( jBody[ 'cod' ] )
+	nTotal := Val( jBody[ 'totalPedidos' ] )
+
+	DBSelectArea( 'ZTR' )
+	ZTR->( DBSetOrder( 1 ) )
+
+	RecLock( 'ZTR', .T. )
+	ZTR->ZTR_COD    := PadR( cCod,                        6   )
+	ZTR->ZTR_MOTOR  := PadR( AllTrim( jBody[ 'motor' ] ), 6   )
+	ZTR->ZTR_VEIC   := PadR( AllTrim( jBody[ 'veic'  ] ), 6   )
+	ZTR->ZTR_DATA   := StoD(          jBody[ 'data'  ]        )
+	ZTR->ZTR_STATUS := '1'
+	ZTR->ZTR_OBS    := PadR( DecodeUTF8( AllTrim( jBody[ 'obs' ] ) ), 100 )
+	MsUnlock()
+
+	DBSelectArea( 'ZTP' )
+
+	For nI := 1 To nTotal
+
+		RecLock( 'ZTP', .T. )
+		ZTP->ZTP_ROTA   := PadR( cCod, 6 )
+		ZTP->ZTP_PEDIDO := PadR( AllTrim( jBody[ 'pedido' + cValToChar( nI ) ] ), 6 )
+		ZTP->ZTP_SEQ    := PadR( AllTrim( jBody[ 'seq'    + cValToChar( nI ) ] ), 3 )
+		ZTP->ZTP_STATUS := '0'
+		ZTP->ZTP_OBS    := ''
+		MsUnlock()
+
+	Next nI
+
+	// Monta resposta
+	jResponse[ 'success' ] := .T.
+	jResponse[ 'cod'     ] := cCod
+
+	oRest:setKeyHeaderResponse( 'Access-Control-Allow-Origin',  '*' )
+	oRest:setKeyHeaderResponse( 'Access-Control-Allow-Methods', 'GET, POST, OPTIONS' )
+	oRest:setKeyHeaderResponse( 'Access-Control-Allow-Headers', 'Content-Type, Authorization' )
+	oRest:setKeyHeaderResponse( 'Content-Type', 'application/json; charset=utf-8' )
+	oRest:SetResponse( jResponse:ToJson() )
+
+Return( .T. )
+
+	@Get( '/api/tracklog/rotas/motorista' )
+User Function getRotaMotorista()
+
+	Local jResponse := JsonObject():New()  As Json
+	Local jRota     := NIL                 As Json
+	Local jPedido   := NIL                 As Json
+
+	Local aPedidos  := {}                  As Array
+
+	Local cCodRota  := ''                  As Character
+	Local cNumPed   := ''                  As Character
+	Local nVolumes  := 0                   As Numeric
+
+	// Busca a rota ativa
+	DBSelectArea( 'ZTR' )
+	ZTR->( DBSetOrder( 1 ) )
+	ZTR->( DBGoTop() )
+
+	While ZTR->( !EoF() )
+
+		IF !ZTR->( Deleted() )
+
+			cCodRota := AllTrim( ZTR->ZTR_COD )
+
+			jRota := JsonObject():New()
+			jRota[ 'cod'    ] := AllTrim( ZTR->ZTR_COD    )
+			jRota[ 'motor'  ] := AllTrim( ZTR->ZTR_MOTOR  )
+			jRota[ 'status' ] := AllTrim( ZTR->ZTR_STATUS )
+			jRota[ 'obs'    ] := EncodeUTF8( AllTrim( ZTR->ZTR_OBS ) )
+			Exit
+
+		EndIF
+
+		ZTR->( DBSkip() )
+
+	EndDo
+
+	IF jRota != NIL
+
+		// Loop nas paradas da rota
+		DBSelectArea( 'ZTP' )
+		ZTP->( DBSetOrder( 1 ) )
+		ZTP->( DBGoTop() )
+
+		While ZTP->( !EoF() )
+
+			IF !ZTP->( Deleted() ) .AND. AllTrim( ZTP->ZTP_ROTA ) == cCodRota
+
+				cNumPed  := AllTrim( ZTP->ZTP_PEDIDO )
+				nVolumes := 0
+
+				jPedido := JsonObject():New()
+				jPedido[ 'pedido' ] := cNumPed
+				jPedido[ 'seq'    ] := Val( AllTrim( ZTP->ZTP_SEQ ) )
+				jPedido[ 'status' ] := AllTrim( ZTP->ZTP_STATUS )
+				jPedido[ 'obs'    ] := EncodeUTF8( AllTrim( ZTP->ZTP_OBS ) )
+
+				// Join com SC5 para dados do pedido
+				DBSelectArea( 'SC5' )
+				SC5->( DBSetOrder( 1 ) )
+
+				IF SC5->( MsSeek( cNumPed ) )
+
+					// Conta volumes via SC6
+					DBSelectArea( 'SC6' )
+					SC6->( DBSetOrder( 1 ) )
+
+					IF SC6->( MsSeek( cNumPed ) )
+
+						While SC6->( !EoF() ) .AND. !SC6->( Deleted() ) .AND. AllTrim( SC6->C6_NUM ) == cNumPed
+							nVolumes++
+
+							SC6->( DBSkip() )
+						EndDo
+
+					EndIF
+
+					jPedido[ 'volumes' ] := nVolumes
+
+					// Join com SA1 para dados do cliente
+					DBSelectArea( 'SA1' )
+					SA1->( DBSetOrder( 1 ) )
+
+					IF SA1->( MsSeek( AllTrim( SC5->C5_CLIENTE ) + AllTrim( SC5->C5_LOJACLI ) ) )
+						jPedido[ 'nomeCliente' ] := EncodeUTF8( AllTrim( SA1->A1_NOME   ) )
+						jPedido[ 'endereco'    ] := EncodeUTF8( AllTrim( SA1->A1_END    ) )
+						jPedido[ 'bairro'      ] := EncodeUTF8( AllTrim( SA1->A1_BAIRRO ) )
+						jPedido[ 'cidade'      ] := EncodeUTF8( AllTrim( SA1->A1_MUN    ) )
+						jPedido[ 'estado'      ] := EncodeUTF8( AllTrim( SA1->A1_EST    ) )
+						jPedido[ 'telefone'    ] := EncodeUTF8( AllTrim( SA1->A1_TEL    ) )
+					Else
+						jPedido[ 'nomeCliente' ] := 'Cliente não informado'
+						jPedido[ 'endereco'    ] := ''
+						jPedido[ 'bairro'      ] := ''
+						jPedido[ 'cidade'      ] := ''
+						jPedido[ 'estado'      ] := ''
+						jPedido[ 'telefone'    ] := ''
+					EndIF
+
+				EndIF
+
+				// Volta para ZTP antes do próximo DBSkip
+				DBSelectArea( 'ZTP' )
+				aAdd( aPedidos, jPedido )
+
+			EndIF
+
+			ZTP->( DBSkip() )
+
+		EndDo
+
+		jRota[ 'pedidos' ] := aPedidos
+		jResponse[ 'success' ] := .T.
+		jResponse[ 'data'    ] := jRota
+
+	Else
+
+		jResponse[ 'success' ] := .F.
+		jResponse[ 'message' ] := 'Nenhuma rota encontrada'
+
+	EndIF
+
+	oRest:setKeyHeaderResponse( 'Access-Control-Allow-Origin',  '*'                           )
+	oRest:setKeyHeaderResponse( 'Access-Control-Allow-Methods', 'GET, POST, OPTIONS'          )
+	oRest:setKeyHeaderResponse( 'Access-Control-Allow-Headers', 'Content-Type, Authorization' )
+	oRest:setKeyHeaderResponse( 'Content-Type',                 'application/json; charset=utf-8' )
+	oRest:SetResponse( jResponse:ToJson() )
+
+Return( .T. )
+
+	@Post( '/api/tracklog/pedidos/atualizar' )
+User Function atualizarPedido()
+
+	Local jBody      			:= JsonObject():New()  			As Json
+	Local jResponse  			:= JsonObject():New()  			As Json
+
+	Local cBody      			:= oRest:GetBodyRequest() 		As Character
+	Local cRota      			:= ''                     		As Character
+	Local cPedido    			:= ''                     		As Character
+	Local cStatus    			:= ''                     		As Character
+	Local cObs       			:= ''                     		As Character
+	Local cHora      			:= Time()                 		As Character
+
+	Local lRoteiroFinalizado 	:= .T. 							As Logical
+	Local lEncontrou 		 	:= .F. 							As Logical
+
+	jBody:FromJson( cBody )
+
+	cRota   := AllTrim( jBody[ 'rota'   ] )
+	cPedido := AllTrim( jBody[ 'pedido' ] )
+	cStatus := AllTrim( jBody[ 'status' ] )
+	cObs    := AllTrim( jBody[ 'obs'    ] )
+
+	// Valida status
+	IF cStatus != '0' .AND. cStatus != '1' .AND. cStatus != '2' .AND. cStatus != '3'
+		jResponse[ 'success' ] := .F.
+		jResponse[ 'message' ] := 'Status invalido. Use: 0=Pendente, 1=Chegou, 2=Entregue, 3=Problema'
+		oRest:setKeyHeaderResponse( 'Content-Type', 'application/json; charset=utf-8' )
+		oRest:SetResponse( jResponse:ToJson() )
+
+		Return( .T. )
+	EndIF
+
+	// Localiza e atualiza o registro na ZTP
+	DBSelectArea( 'ZTP' )
+	ZTP->( DBSetOrder( 1 ) )
+	ZTP->( DBGoTop() )
+
+	While ZTP->( !EoF() )
+
+		IF !ZTP->( Deleted() ) .AND. AllTrim( ZTP->ZTP_ROTA ) == cRota .AND. AllTrim( ZTP->ZTP_PEDIDO ) == cPedido
+
+			RecLock( 'ZTP', .F. )
+
+			ZTP->ZTP_STATUS := cStatus
+			ZTP->ZTP_OBS    := PadR( DecodeUTF8( cObs ), Len( ZTP->ZTP_OBS ) )
+
+			// Hora de chegada: grava quando status = 1 (Chegou)
+			IF cStatus == '1'
+				ZTP->ZTP_HRCHEG := cHora
+			EndIF
+
+			// Hora de saida: grava quando status = 2 (Entregue) ou 3 (Problema)
+			IF cStatus == '2' .OR. cStatus == '3'
+				ZTP->ZTP_HRSAI := cHora
+			EndIF
+
+			MsUnlock()
+
+			lEncontrou := .T.
+			Exit
+
+		EndIF
+
+		ZTP->( DBSkip() )
+
+	EndDo
+
+	IF lEncontrou
+
+		ZTP->( DBGoTop() )
+
+		While ZTP->( !EoF() )
+
+			IF !ZTP->( Deleted() ) .AND. AllTrim( ZTP->ZTP_ROTA ) == cRota
+
+				IF AllTrim( ZTP->ZTP_STATUS ) == '0' .OR. AllTrim( ZTP->ZTP_STATUS ) == '1'
+					lRoteiroFinalizado := .F.
+					Exit
+				EndIF
+
+			EndIF
+
+			ZTP->( DBSkip() )
+		EndDo
+
+		IF lRoteiroFinalizado
+
+			DBSelectArea( 'ZTR' )
+			ZTR->( DBSetOrder( 1 ) )
+			ZTR->( DBGoTop() )
+
+			While ZTR->( !EoF() )
+
+				IF !ZTR->( Deleted() ) .AND. AllTrim( ZTR->ZTR_COD ) == cRota
+					RecLock( 'ZTR', .F. )
+					ZTR->ZTR_STATUS := '2'
+
+					MsUnlock()
+					Exit
+				EndIF
+
+				ZTR->( DBSkip() )
+			EndDo
+
+		EndIF
+
+		jResponse[ 'success'    ] := .T.
+		jResponse[ 'message'    ] := 'Status atualizado com sucesso'
+		jResponse[ 'finalizada' ] := lRoteiroFinalizado
+
+	Else
+
+		jResponse[ 'success' ] := .F.
+		jResponse[ 'message' ] := 'Parada nao encontrada: rota ' + cRota + ' / pedido ' + cPedido
+
+	EndIF
+
+	oRest:setKeyHeaderResponse( 'Access-Control-Allow-Origin',  '*'                           )
+	oRest:setKeyHeaderResponse( 'Access-Control-Allow-Methods', 'GET, POST, OPTIONS'          )
+	oRest:setKeyHeaderResponse( 'Access-Control-Allow-Headers', 'Content-Type, Authorization' )
+	oRest:setKeyHeaderResponse( 'Content-Type',             'application/json; charset=utf-8' )
+	oRest:SetResponse( jResponse:ToJson() )
+
+Return( .T. )
+
+	@Post( '/api/tracklog/localizacao' )
+User Function logLocalizacao()
+
+	Local jBody     := JsonObject():New()  As Json
+	Local jResponse := JsonObject():New()  As Json
+
+	Local cBody := oRest:GetBodyRequest() As Character
+
+	jBody:FromJson( cBody )
+
+	DBSelectArea( 'ZTL' )
+
+	RecLock( 'ZTL', .T. )
+	ZTL->ZTL_ROTA   := PadR(  AllTrim( jBody[ 'rota'      ] ),  6 )
+	ZTL->ZTL_DATA   := DToS(  Date()                              )
+	ZTL->ZTL_HORA   :=        Time()
+	ZTL->ZTL_LAT    :=        jBody[ 'lat'       ]
+	ZTL->ZTL_LNG    :=        jBody[ 'lng'       ]
+	ZTL->ZTL_STATUS := PadR(  AllTrim( jBody[ 'status'    ] ),  1 )
+	MsUnlock()
+
+	jResponse[ 'success' ] := .T.
+
+	oRest:setKeyHeaderResponse( 'Access-Control-Allow-Origin',  '*'                          )
+	oRest:setKeyHeaderResponse( 'Access-Control-Allow-Methods', 'GET, POST, OPTIONS'         )
+	oRest:setKeyHeaderResponse( 'Access-Control-Allow-Headers', 'Content-Type, Authorization')
+	oRest:setKeyHeaderResponse( 'Content-Type',            'application/json; charset=utf-8' )
+	oRest:SetResponse( jResponse:ToJson() )
+
+Return( .T. )

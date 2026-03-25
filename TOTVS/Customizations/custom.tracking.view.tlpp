@@ -1,0 +1,42 @@
+#INCLUDE 'TLPP-CORE.TH'
+
+Namespace custom.tracking.poui
+
+/*******************************************************
+{Protheus.doc} abreTracklog
+(Função Desenvolvida Para Abrir o Sistema de Tracklog).
+@type user function
+@author
+@since 28/02/2026
+@version 1.0
+custom.tracking.poui.abreTracklog
+*******************************************************/
+User Function abreTracklog()
+
+    Local oDlg          := NIL      As Object
+    Local oWebEngine    := NIL      As Object
+    Local oWebChannel   := NIL      As Object
+
+    Local cUrl          := ''       As Character
+
+    Local nPort         := 0        As Numeric
+    Local nLargura      := 1400     As Numeric
+    Local nAltura       := 900      As Numeric
+
+    Local lRet          := .T.      As Logical
+
+    cUrl := 'http://localhost:4200'
+
+    oDlg        := TDialog():New( 0, 0, nAltura, nLargura,,,,,,,,,, .T. )
+    oWebChannel := TWebChannel():New()
+    nPort       := oWebChannel:Connect()
+
+    oWebEngine               := TWebEngine():New( oDlg, 0, 0, 100, 100,, nPort )
+    oWebEngine:bLoadFinished := { |self, url| ConOut( '[Tracklog] Carregado: ' + url ) }
+    oWebEngine:navigate( cUrl )
+    oWebEngine:Align         := CONTROL_ALIGN_ALLCLIENT
+
+    oDlg:lMaximized := .T.
+    oDlg:Activate( ,,,.T. )
+
+Return( lRet )
